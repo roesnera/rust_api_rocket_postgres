@@ -26,10 +26,10 @@ pub async fn create_crate(new_crate: Json<NewCrate>, db: DbConn) -> Result<Custo
         .map_err(|_| Custom(Status::InternalServerError, json!("Error")))
     }).await
 }
-#[rocket::put("/crates/<id>", format="json", data="<a_crate>")]
-pub async fn update_crate(id: i32, a_crate: Json<Crate>, db: DbConn) -> Result<Value, Custom<Value>> {
+#[rocket::put("/crates/<id>", format="json", data="<da_crate>")]
+pub async fn update_crate(id: i32, da_crate: Json<Crate>, db: DbConn) -> Result<Value, Custom<Value>> {
     db.run(move |c| {
-        CrateRepository::update(c, id, a_crate.into_inner())
+        CrateRepository::update(c, id, da_crate.into_inner())
         .map(|a_crate| json!(a_crate))
         .map_err(|_| Custom(Status::InternalServerError, json!("Error")))
     }).await
