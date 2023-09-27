@@ -30,9 +30,16 @@ pub fn main() {
 
     match matches.subcommand() {
         Some(("users", sub_matches)) => match sub_matches.subcommand() {
-            Some(("create", sub_matches)) => create_user(),
-            Some(("list", sub_matches)) => list_users(),
-            Some(("delete", sub_matches)) => delete_user(),
+            Some(("create", sub_matches)) => rust_database_for_api::commands::create_user(
+                sub_matches.get_one::<String>("username").unwrap().to_owned(),
+                sub_matches.get_one::<String>("password").unwrap().to_owned(),
+                sub_matches.get_many::<String>("roles").unwrap().map(|v| v.to_string()).collect()
+            ),
+            Some(("list", _)) => rust_database_for_api::commands::list_users(),
+            Some(("delete", sub_matches)) => rust_database_for_api::commands::delete_user(
+                sub_matches.get_one::<i32>("id").unwrap().to_owned()
+            ),
+            _ => {}
         },
         _ => {},
     }
