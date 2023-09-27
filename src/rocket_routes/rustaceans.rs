@@ -1,7 +1,8 @@
 use diesel::result::Error;
 use rocket::{serde::json::{Json, Value, serde_json::json}, response::status::{Custom, NoContent}, http::Status};
 
-use crate::{models::{NewRustacean,Rustacean}, repositories::RustaceanRepository, DbConn};
+use crate::{models::{NewRustacean,Rustacean}, repositories::RustaceanRepository};
+use crate::rocket_routes::DbConn;
 
 use super::{server_error, not_found_error};
 

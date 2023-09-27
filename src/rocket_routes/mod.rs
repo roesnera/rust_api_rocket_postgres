@@ -6,6 +6,10 @@ use rocket::http::Status;
 
 pub mod rustaceans;
 pub mod crates;
+use diesel::PgConnection;
+
+#[rocket_sync_db_pools::database("postgres")]
+pub struct DbConn(PgConnection);
 
 pub fn server_error(e: Box< dyn std::error::Error>) -> Custom<Value>{
         log::error!("{}", e);
