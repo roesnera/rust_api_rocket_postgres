@@ -1,8 +1,9 @@
+use diesel::result::Error;
 use rocket::{serde::json::{Json, Value, serde_json::json}, response::status::{Custom, NoContent}, http::Status};
 
 use crate::{models::{NewCrate,Crate}, repositories::CrateRepository, DbConn};
 
-use super::server_error;
+use super::{server_error, not_found_error};
 
 
 #[rocket::get("/crates")]
@@ -18,7 +19,12 @@ pub async fn view_crate(id: i32, db: DbConn ) -> Result<Value, Custom<Value>> {
     db.run(move |c| {
         CrateRepository::find(c, id)
         .map(|new_crate| json!(new_crate))
-        .map_err(|e| server_error(e.into()))
+        .map_err(|e: Error| {
+            if e == diesel::result::Error::NotFound {
+                return not_found_error(e.into())
+            }
+            server_error(e.into())
+        })
     }).await
 }
 #[rocket::post("/crates", format="json", data="<new_crate>")]
@@ -34,7 +40,12 @@ pub async fn update_crate(id: i32, da_crate: Json<Crate>, db: DbConn) -> Result<
     db.run(move |c| {
         CrateRepository::update(c, id, da_crate.into_inner())
         .map(|a_crate| json!(a_crate))
-        .map_err(|e| server_error(e.into()))
+        .map_err(|e: Error| {
+            if e == diesel::result::Error::NotFound {
+                return not_found_error(e.into())
+            }
+            server_error(e.into())
+        })
     }).await
 }
 #[rocket::delete("/crates/<id>")]
@@ -46,6 +57,11 @@ pub async fn delete_crate(id: i32, db: DbConn) -> Result<NoContent, Custom<Value
     db.run(move |c| {
         CrateRepository::delete(c, id)
         .map(|_| NoContent)
-        .map_err(|e| server_error(e.into()))
+        .map_err(|e: Error| {
+            if e == diesel::result::Error::NotFound {
+                return not_found_error(e.into())
+            }
+            server_error(e.into())
+        })
     }).await
 }

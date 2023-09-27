@@ -58,6 +58,14 @@ fn test_view_crate() {
 }
 
 #[test]
+fn test_view_invalid_crate() {
+    let client = Client::new();
+    let response = client.get(format!("{}/{}/-1", common::APP_HOST, ENDPOINT)).send().unwrap();
+
+    assert_eq!(response.status(), StatusCode::NOT_FOUND);
+}
+
+#[test]
 fn test_get_crates() {
     let client = Client::new();
     let rustacean1: Value = common::create_test_rustacean(&client);

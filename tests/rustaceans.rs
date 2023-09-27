@@ -66,6 +66,13 @@ fn test_view_rustacean() {
     common::delete_test_rustacean(&client, rustacean);
 }
 
+#[test]
+fn test_view_invalid_rustacean() {
+    let client = Client::new();
+    let response = client.get(format!("{}/{}/-1", common::APP_HOST, ENDPOINT)).send().unwrap();
+
+    assert_eq!(response.status(), StatusCode::NOT_FOUND);
+}
 
 #[test]
 fn test_delete_rustacean() {

@@ -1,8 +1,9 @@
+use diesel::result::Error;
 use rocket::{serde::json::{Json, Value, serde_json::json}, response::status::{Custom, NoContent}, http::Status};
 
 use crate::{models::{NewRustacean,Rustacean}, repositories::RustaceanRepository, DbConn};
 
-use super::server_error;
+use super::{server_error, not_found_error};
 
 #[rocket::get("/rustaceans")]
 pub async fn get_rustaceans(db: DbConn) -> Result<Value, Custom<Value>> {
@@ -17,7 +18,12 @@ pub async fn view_rustacean(id: i32, db: DbConn ) -> Result<Value, Custom<Value>
     db.run(move |c| {
         RustaceanRepository::find(c, id)
         .map(|rustacean| json!(rustacean))
-        .map_err(|e| server_error(e.into()))
+        .map_err(|e: Error| {
+            if e == diesel::result::Error::NotFound {
+                return not_found_error(e.into())
+            }
+            server_error(e.into())
+        })
     }).await
 }
 #[rocket::post("/rustaceans", format="json", data="<new_rustacean>")]
@@ -33,7 +39,12 @@ pub async fn update_rustacean(id: i32, rustacean: Json<Rustacean>, db: DbConn) -
     db.run(move |c| {
         RustaceanRepository::update(c, id, rustacean.into_inner())
         .map(|rustacean| json!(rustacean))
-        .map_err(|e| server_error(e.into()))
+        .map_err(|e: Error| {
+            if e == diesel::result::Error::NotFound {
+                return not_found_error(e.into())
+            }
+            server_error(e.into())
+        })
     }).await
 }
 #[rocket::delete("/rustaceans/<id>")]
@@ -45,6 +56,11 @@ pub async fn delete_rustacean(id: i32, db: DbConn) -> Result<NoContent, Custom<V
     db.run(move |c| {
         RustaceanRepository::delete(c, id)
         .map(|_| NoContent)
-        .map_err(|e| server_error(e.into()))
+        .map_err(|e: Error| {
+            if e == diesel::result::Error::NotFound {
+                return not_found_error(e.into())
+            }
+            server_error(e.into())
+        })
     }).await
 }
