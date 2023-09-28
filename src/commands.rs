@@ -15,7 +15,7 @@ pub fn create_user(username: String, password: String, role_codes: Vec<String>) 
     let salt = SaltString::generate(OsRng);
     let argon = argon2::Argon2::default();
     let password_hash = argon.hash_password(password.as_bytes(), &salt).unwrap();
-    
+
     let new_user = NewUser {username, password: password_hash.to_string()};
     let user = UserRepository::create(&mut c, new_user, role_codes).unwrap();
     println!("User created {:?}", user);
@@ -24,9 +24,16 @@ pub fn create_user(username: String, password: String, role_codes: Vec<String>) 
 }
 
 pub fn list_users() {
+    let mut c = load_db_connection();
 
+    let users = UserRepository::find_all_with_roles(&mut c).unwrap();
+    for user in users {
+        println!("User: {:?}", user);
+    }
 }
 
 pub fn delete_user(id: i32) {
+    let mut c = load_db_connection();
 
+    let _ = UserRepository::delete(&mut c, id);
 }

@@ -87,6 +87,29 @@ impl UserRepository {
 
         Ok(user)
     }
+
+    pub fn delete(c: &mut PgConnection, id: i32) -> QueryResult<usize> {
+        diesel::delete(
+            users_roles::table.filter(users_roles::user_id.eq(id))
+        ).execute(c)?;
+        
+        diesel::delete(
+            users::table.find(id)
+        ).execute(c)
+    }
+
+    pub fn find_all_with_roles(c: &mut PgConnection) -> QueryResult<Vec<(User, Vec<(UserRole, Role)>)>> {
+        let users = users::table.load(c)?;
+
+        let result = users_roles::table.inner_join(roles::table)
+            .load::<(UserRole, Role)>(c)?
+            .grouped_by(&users);
+
+        // this method .zip() is sick
+        // it creates a new iterable out of two distinct iterables where the new iterable
+        // contains a tuple of data from iter1 and iter2 that are "zipped" together into pairs
+        Ok(users.into_iter().zip(result).collect())
+    }
 }
 
 pub struct RoleRepository;
