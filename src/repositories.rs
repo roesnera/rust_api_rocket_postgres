@@ -64,6 +64,10 @@ impl CrateRepository {
 
 pub struct UserRepository;
 impl UserRepository {
+    pub fn find_by_username(c: &mut PgConnection, name: &String) -> QueryResult<User> {
+        users::table.filter(users::username.eq(name)).first(c)
+    }
+
     pub fn create(c: &mut PgConnection, new_user: NewUser, role_codes: Vec<String>) -> QueryResult<User> {
         let user = diesel::insert_into(users::table)
             .values(new_user)

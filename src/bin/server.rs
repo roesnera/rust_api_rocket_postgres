@@ -5,6 +5,7 @@ extern crate rust_database_for_api;
 async fn main() {
     let _ = rocket::build()
         .mount("/", rocket::routes![
+            rust_database_for_api::rocket_routes::authorization::login,
             rust_database_for_api::rocket_routes::rustaceans::get_rustaceans,
             rust_database_for_api::rocket_routes::rustaceans::view_rustacean,
             rust_database_for_api::rocket_routes::rustaceans::create_rustacean,

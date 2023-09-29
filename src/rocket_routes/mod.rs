@@ -3,7 +3,7 @@ use serde_json::{Value, json};
 use rocket::http::Status;
 
 
-
+pub mod authorization;
 pub mod rustaceans;
 pub mod crates;
 use diesel::PgConnection;
