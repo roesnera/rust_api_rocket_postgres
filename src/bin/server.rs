@@ -1,5 +1,7 @@
 extern crate rust_database_for_api;
 
+use rocket_db_pools::Database;
+
 
 #[rocket::main]
 async fn main() {
@@ -23,6 +25,7 @@ async fn main() {
             otherwise, panic
          */
         .attach(rust_database_for_api::rocket_routes::DbConn::fairing())
+        .attach(rust_database_for_api::rocket_routes::CacheConn::init())
         .launch()
         .await;
 }

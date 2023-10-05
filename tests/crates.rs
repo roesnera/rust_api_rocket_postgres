@@ -1,6 +1,8 @@
 use reqwest::{blocking::Client, StatusCode};
 use serde_json::{json, Value};
 
+use crate::common::delete_test_rustacean;
+
 pub mod common;
 
 static ENDPOINT: &'static str = "crates";
@@ -8,18 +10,21 @@ static ENDPOINT: &'static str = "crates";
 #[test]
 fn test_create_crate() {
     let client = Client::new();
+
+    let rustacean = common::create_test_rustacean(&client);
     
     let response = client.post(format!("{}/{}", common::APP_HOST, ENDPOINT))
         .json(&json!({
-            "name": "Test rustacean",
+            "name": "Test Crate",
             "code": "pub fn main() { }",
             "version": "1.0",
-            "rustacean_id": 2
+            "rustacean_id": rustacean["id"]
         }))
         .send().unwrap();
     assert_eq!(response.status(), StatusCode::CREATED);
     
-    delete_test_crate(&client, response.json().unwrap())
+    delete_test_crate(&client, response.json().unwrap());
+    delete_test_rustacean(&client, rustacean);
 }
 
 fn delete_test_crate(client: &Client, da_crate: Value) {
