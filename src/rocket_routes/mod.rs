@@ -1,6 +1,9 @@
-use rocket::{response::status::Custom, Request, request::{self, FromRequest, Outcome}};
-use serde_json::{Value, json};
+// use rocket::{response::status::Custom, Request, request::{self, FromRequest, Outcome}};
+use rocket::Request;
 use rocket::http::Status;
+use rocket::request::{FromRequest, Outcome};
+use rocket::response::status::Custom;
+use rocket::serde::json::{serde_json::json, Value};
 use rocket_db_pools::{deadpool_redis::{self, redis::AsyncCommands}, Database, Connection};
 
 
@@ -31,7 +34,7 @@ pub fn not_found_error(e: Box< dyn std::error::Error>) -> Custom<Value> {
 #[rocket::async_trait]
 impl<'r> FromRequest<'r> for User {
         type Error = ();
-        async fn from_request(request: &'r Request<'_>) -> request::Outcome<Self, Self::Error> {
+        async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
                 // Authorization: Bearer SESSION_ID_128_CHARS_LONG
                 let session_header = request.headers().get_one("Authorization")
                         .map(|v| v.split_whitespace().collect::<Vec<_>>())
