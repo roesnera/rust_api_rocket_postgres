@@ -35,3 +35,41 @@ fn test_login() {
     assert!(json.get("token").is_some());
     assert_eq!(json["token"].as_str().unwrap().len(), 128);
 }
+
+
+#[test]
+fn test_login_wrong_password() {
+    let client = Client::new();
+
+    let response = client.post(format!("{}/{}", common::APP_HOST, ENDPOINT))
+    .json(&json!({
+        "username": "test_admin",
+        "password": "12345"
+    }))
+    .send().unwrap();
+assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
+}
+
+#[test]
+fn test_login_wrong_username() {
+    let client = Client::new();
+
+    let response = client.post(format!("{}/{}", common::APP_HOST, ENDPOINT))
+    .json(&json!({
+        "username": "test_admi",
+        "password": "1234"
+    }))
+    .send().unwrap();
+assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
+}
+
+fn _login_test_user(client: &Client) -> Value {
+    let response = client.post(format!("{}/{}", common::APP_HOST, ENDPOINT))
+        .json(&json!({
+            "username": "test_admin",
+            "password": "1234"
+        }))
+        .send().unwrap();
+    assert_eq!(response.status(), StatusCode::OK);
+    response.json().unwrap()
+}

@@ -17,7 +17,12 @@ pub async fn login(credentials: Json<Credentials>, db: DbConn, mut cache: Connec
     let username = credentials.username.clone();
     let user = db.run(move |c| {
         UserRepository::find_by_username(c, &username)
-        .map_err(|e| server_error(e.into()))
+        .map_err(|e| match e {
+            diesel::result::Error::NotFound => Custom(Status::Unauthorized, json!("Username is not valid")),
+            _ => server_error(e.into())
+        })
+
+        // UserRepository::get_result()
     }).await?;
 
     let session_id = authorize_user(&user, &credentials)
