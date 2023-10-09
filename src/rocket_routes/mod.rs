@@ -12,6 +12,8 @@ pub mod rustaceans;
 pub mod crates;
 use diesel::PgConnection;
 
+use crate::models::RoleCode;
+use crate::repositories::RoleRepository;
 use crate::{models::User, repositories::UserRepository};
 
 #[rocket_sync_db_pools::database("postgres")]
@@ -58,6 +60,41 @@ impl<'r> FromRequest<'r> for User {
                 }
 
                 Outcome::Failure((Status::Unauthorized, ()))
+
+        }
+}
+
+pub struct EditorUser(User);
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for EditorUser {
+        type Error = ();
+        async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
+                let user = request.guard::<User>().await.expect("Cannot retrieve logged in user in request guard");
+
+                let db: DbConn = request.guard::<DbConn>().await
+                        .expect("Cannot connect to postres in request guard");
+
+                let editor_option = db.run(|c| {
+                        match RoleRepository::find_by_user(c, &user) {
+                                Ok(roles) => {
+                                        log::info!("Assigned roles: {:?}", roles);
+                                        let is_editor = roles.iter().any(|r| match r.code {
+                                        RoleCode::Admin => true,
+                                        RoleCode::Editor => true,
+                                        _ => false,
+                                });
+                                log::info!("is_editor: {:?}", is_editor);
+                                is_editor.then_some(EditorUser(user))
+                                },
+                                _ => None
+                        }
+                }).await;
+
+                match editor_option {
+                        Some(editor_user) => Outcome::Success(editor_user),
+                        None => Outcome::Failure((Status::Unauthorized, ()))
+                }
 
         }
 }

@@ -73,17 +73,17 @@ impl UserRepository {
         
     }
 
-    pub fn create(c: &mut PgConnection, new_user: NewUser, role_codes: Vec<String>) -> QueryResult<User> {
+    pub fn create(c: &mut PgConnection, new_user: NewUser, role_codes: Vec<RoleCode>) -> QueryResult<User> {
         let user = diesel::insert_into(users::table)
             .values(new_user)
             .get_result::<User>(c)?;
 
         for role_code in role_codes {
             let new_user_role = {
-                if let Ok(role) = RoleRepository::find_by_code(c, role_code.to_owned()) {
+                if let Ok(role) = RoleRepository::find_by_code(c, role_code.to_string().to_owned()) {
                     NewUserRole {user_id: user.id, role_id: role.id}
                 } else {
-                    let new_role = NewRole {name: role_code.to_owned(), code: role_code.to_owned()};
+                    let new_role = NewRole {name: role_code.to_string().to_owned(), code: role_code.to_owned()};
                     let role = RoleRepository::create(c, new_role)?;
                     NewUserRole {user_id: user.id, role_id: role.id}
                 }

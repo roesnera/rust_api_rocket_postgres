@@ -1,13 +1,15 @@
 use reqwest::{blocking::Client, StatusCode};
 use serde_json::{json, Value};
 
+use crate::common::get_client_with_logged_in_admin;
+
 pub mod common;
 
 static ENDPOINT: &'static str = "rustaceans";
 
 #[test]
 fn test_get_rustaceans() {
-    let client = Client::new();
+    let client = get_client_with_logged_in_admin();
     let rustacean1 = common::create_test_rustacean(&client);
     let rustacean2 = common::create_test_rustacean(&client);
 
@@ -19,9 +21,26 @@ fn test_get_rustaceans() {
     common::delete_test_rustacean(&client, rustacean1);
     common::delete_test_rustacean(&client, rustacean2);
 }
+
+#[test]
+fn test_get_rustaceans_without_login_credentials() {
+    let client = get_client_with_logged_in_admin();
+    let rustacean1 = common::create_test_rustacean(&client);
+    let rustacean2 = common::create_test_rustacean(&client);
+    let client = Client::new();
+
+    let response = client.get(format!("{}/{}", common::APP_HOST, ENDPOINT)).send().unwrap();
+    assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
+    
+    let client = get_client_with_logged_in_admin();
+    common::delete_test_rustacean(&client, rustacean1);
+    common::delete_test_rustacean(&client, rustacean2);
+}
+
+
 #[test]
 fn test_create_rustacean() {
-    let client = Client::new();
+    let client = get_client_with_logged_in_admin();
 
     let rustacean: Value = common::create_test_rustacean(&client);
     assert_eq!(rustacean, json!({
@@ -35,7 +54,7 @@ fn test_create_rustacean() {
 }
 #[test]
 fn test_update_rustacean() {
-    let client = Client::new();
+    let client = get_client_with_logged_in_admin();
     let rustacean = common::create_test_rustacean(&client);
 
     let response = client.put(format!("{}/{}/{}", common::APP_HOST, ENDPOINT, rustacean["id"]))
@@ -58,7 +77,7 @@ fn test_update_rustacean() {
 
 #[test]
 fn test_view_rustacean() {
-    let client = Client::new();
+    let client = get_client_with_logged_in_admin();
     let rustacean: Value = common::create_test_rustacean(&client);
 
     let saved_rustacean: Value = client.get(format!("{}/{}/{}", common::APP_HOST, ENDPOINT, rustacean["id"])).send().unwrap().json().unwrap();
@@ -68,7 +87,7 @@ fn test_view_rustacean() {
 
 #[test]
 fn test_view_invalid_rustacean() {
-    let client = Client::new();
+    let client = get_client_with_logged_in_admin();
     let response = client.get(format!("{}/{}/-1", common::APP_HOST, ENDPOINT)).send().unwrap();
 
     assert_eq!(response.status(), StatusCode::NOT_FOUND);
@@ -76,7 +95,7 @@ fn test_view_invalid_rustacean() {
 
 #[test]
 fn test_delete_rustacean() {
-    let client = Client::new();
+    let client = get_client_with_logged_in_admin();
     let rustacean: Value = common::create_test_rustacean(&client);
     
     let response = client.delete(format!("{}/{}/{}", common::APP_HOST, ENDPOINT, rustacean["id"])).send().unwrap();
