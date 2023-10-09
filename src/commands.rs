@@ -16,6 +16,7 @@ pub fn create_user(username: String, password: String, role_codes: Vec<String>) 
 
     let new_user = NewUser {username, password: password_hash};
     let role_codes = role_codes.iter().map(|v| RoleCode::from_str(&v).unwrap()).collect();
+    println!("User role codes: {:?}", role_codes);
     let user = UserRepository::create(&mut c, new_user, role_codes).unwrap();
     println!("User created {:?}", user);
     let roles = RoleRepository::find_by_user(&mut c, &user).unwrap();

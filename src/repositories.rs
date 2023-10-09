@@ -79,6 +79,7 @@ impl UserRepository {
             .get_result::<User>(c)?;
 
         for role_code in role_codes {
+            log::info!("{:?}", role_code);
             let new_user_role = {
                 if let Ok(role) = RoleRepository::find_by_code(c, role_code.to_string().to_owned()) {
                     NewUserRole {user_id: user.id, role_id: role.id}

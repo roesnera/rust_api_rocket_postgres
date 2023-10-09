@@ -66,6 +66,8 @@ impl<'r> FromRequest<'r> for User {
 
 pub struct EditorUser(User);
 
+
+// Returns 401 if the user is not Admin or Editor
 #[rocket::async_trait]
 impl<'r> FromRequest<'r> for EditorUser {
         type Error = ();

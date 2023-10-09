@@ -1,3 +1,4 @@
+use common::get_client_with_logged_in_viewer;
 use reqwest::{blocking::Client, StatusCode};
 use serde_json::{json, Value};
 
@@ -27,23 +28,25 @@ fn test_create_crate() {
     delete_test_rustacean(&client, rustacean);
 }
 
-fn delete_test_crate(client: &Client, da_crate: Value) {
-    let response = client.delete(format!("{}/{}/{}",common::APP_HOST, ENDPOINT, da_crate["id"]))
-    .send().unwrap();
-    assert_eq!(response.status(), StatusCode::NO_CONTENT);
-}
+#[test]
+fn test_create_crate_with_viewers_credentials() {
+    let admin_client = get_client_with_logged_in_admin();
 
-fn create_test_crate(client: &Client, rustacean: &Value) -> Value {
+    let rustacean = common::create_test_rustacean(&admin_client);
+    let client = get_client_with_logged_in_viewer();
+
     let response = client.post(format!("{}/{}", common::APP_HOST, ENDPOINT))
-        .json(&json!({
-            "name": "Test Crate",
-            "code": "pub fn main() { print!('foo'); }",
-            "version": "1.0",
-            "rustacean_id": rustacean["id"]
-        }))
-        .send().unwrap();
-    assert_eq!(response.status(), StatusCode::CREATED);
-    response.json().unwrap()
+    .json(&json!({
+        "name": "Test Crate",
+        "code": "pub fn main() { }",
+        "version": "1.0",
+        "rustacean_id": rustacean["id"]
+    }))
+    .send().unwrap();
+    assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
+    
+    let admin_client = get_client_with_logged_in_admin();
+    delete_test_rustacean(&admin_client, rustacean);
 }
 
 #[test]
@@ -112,7 +115,7 @@ fn test_get_crates_without_login_credentials() {
 }
 
 #[test]
-fn test_update_rustacean() {
+fn test_update_crate() {
     let client = get_client_with_logged_in_admin();
 
     let rustacean = common::create_test_rustacean(&client);
@@ -144,6 +147,31 @@ fn test_update_rustacean() {
 }
 
 #[test]
+fn test_update_crate_with_viewer_credentials() {
+    let client = get_client_with_logged_in_admin();
+
+    let rustacean = common::create_test_rustacean(&client);
+
+    let a_crate = create_test_crate(&client, &rustacean);
+
+    let client = get_client_with_logged_in_viewer();
+
+    let response = client.put(format!("{}/{}/{}", common::APP_HOST, ENDPOINT, a_crate["id"]))
+        .json(&json!({
+            "name": a_crate["name"],
+            "code": a_crate["code"],
+            "version": "1.1",
+            "rustacean_id": rustacean["id"]
+        }))
+        .send().unwrap();
+    assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
+
+    let client = get_client_with_logged_in_admin();
+    delete_test_crate(&client, a_crate);
+    common::delete_test_rustacean(&client, rustacean);
+}
+
+#[test]
 fn test_delete_crate() {
     let client = get_client_with_logged_in_admin();
 
@@ -153,4 +181,26 @@ fn test_delete_crate() {
         .send().unwrap();
     assert_eq!(response.status(), StatusCode::NO_CONTENT);
     common::delete_test_rustacean(&client, rustacean);
+}
+
+
+/* UTILITY FUNCTIONS */
+
+fn delete_test_crate(client: &Client, da_crate: Value) {
+    let response = client.delete(format!("{}/{}/{}",common::APP_HOST, ENDPOINT, da_crate["id"]))
+    .send().unwrap();
+    assert_eq!(response.status(), StatusCode::NO_CONTENT);
+}
+
+fn create_test_crate(client: &Client, rustacean: &Value) -> Value {
+    let response = client.post(format!("{}/{}", common::APP_HOST, ENDPOINT))
+        .json(&json!({
+            "name": "Test Crate",
+            "code": "pub fn main() { print!('foo'); }",
+            "version": "1.0",
+            "rustacean_id": rustacean["id"]
+        }))
+        .send().unwrap();
+    assert_eq!(response.status(), StatusCode::CREATED);
+    response.json().unwrap()
 }

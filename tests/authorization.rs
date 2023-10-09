@@ -75,14 +75,3 @@ fn test_login_wrong_username() {
     .send().unwrap();
 assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
 }
-
-fn _login_test_user(client: &Client) -> Value {
-    let response = client.post(format!("{}/{}", common::APP_HOST, LOGIN_ENDPOINT))
-        .json(&json!({
-            "username": "test_admin",
-            "password": "1234"
-        }))
-        .send().unwrap();
-    assert_eq!(response.status(), StatusCode::OK);
-    response.json().unwrap()
-}

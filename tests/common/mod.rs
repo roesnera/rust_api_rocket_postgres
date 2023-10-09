@@ -23,15 +23,25 @@ pub fn delete_test_rustacean(client: &Client, rustacean: Value) {
 }
 
 pub fn get_client_with_logged_in_admin() -> Client {
+    let role = String::from("admin");
+    get_client_with_specified_credentials(role)
+}
+
+pub fn get_client_with_logged_in_viewer() -> Client {
+    let role = String::from("viewer");
+    get_client_with_specified_credentials(role)
+}
+
+pub fn get_client_with_specified_credentials(role: String) -> Client {
     let output = Command::new("cargo")
         .arg("run")
         .arg("--bin")
         .arg("cli")
         .arg("users")
         .arg("create")
-        .arg("test_admin")
+        .arg(format!("test_{}", role))
         .arg("1234")
-        .arg("admin")
+        .arg(format!("{}", role))
         .output();
 
     println!("{:?}", output);
@@ -40,7 +50,7 @@ pub fn get_client_with_logged_in_admin() -> Client {
     
     let response = client.post(format!("{}/{}", APP_HOST, LOGIN_ENDPOINT))
         .json(&json!({
-            "username": "test_admin",
+            "username": format!("test_{}", role),
             "password": "1234"
         }))
         .send().unwrap();

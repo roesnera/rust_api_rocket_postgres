@@ -106,8 +106,8 @@ impl FromStr for RoleCode {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.as_bytes() {
             b"admin" => Ok(RoleCode::Admin),
-            b"editor" => Ok(RoleCode::Admin),
-            b"viewer" => Ok(RoleCode::Admin),
+            b"editor" => Ok(RoleCode::Editor),
+            b"viewer" => Ok(RoleCode::Viewer),
             _ => Err(())
         }
     }
@@ -127,8 +127,8 @@ impl FromSql<Text, Pg> for RoleCode {
     fn from_sql(value: PgValue) -> diesel::deserialize::Result<Self> {
         match value.as_bytes() {
             b"admin" => Ok(RoleCode::Admin),
-            b"editor" => Ok(RoleCode::Admin),
-            b"viewer" => Ok(RoleCode::Admin),
+            b"editor" => Ok(RoleCode::Editor),
+            b"viewer" => Ok(RoleCode::Viewer),
             _ => Ok(RoleCode::Viewer)
         }
     }
