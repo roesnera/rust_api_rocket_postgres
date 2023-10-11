@@ -26,7 +26,14 @@ pub fn main() {
                     .about("Delete user by id")
                     .arg(Arg::new("id").required(true).value_parser(clap::value_parser!(i32)))
             )
-        ).get_matches();
+        )
+        .subcommand(
+            Command::new("digest-send")
+            .about("Send an email with the newerst crates")
+            .arg(Arg::new("to").required(true))
+            .arg(Arg::new("hours_since").required(true).value_parser(clap::value_parser!(i32)))
+        )
+        .get_matches();
 
     match matches.subcommand() {
         Some(("users", sub_matches)) => match sub_matches.subcommand() {
@@ -41,6 +48,10 @@ pub fn main() {
             ),
             _ => {}
         },
-        _ => {},
+        Some(("digest-send", sub_matches)) => rust_database_for_api::commands::send_digest(
+            sub_matches.get_one::<String>("to").unwrap().to_owned(),
+            sub_matches.get_one::<String>("hours_since").unwrap().to_owned()
+        ),
+        _ => {}
     }
 }
