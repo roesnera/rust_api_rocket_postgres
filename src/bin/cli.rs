@@ -50,7 +50,7 @@ pub fn main() {
         },
         Some(("digest-send", sub_matches)) => rust_database_for_api::commands::send_digest(
             sub_matches.get_one::<String>("to").unwrap().to_owned(),
-            sub_matches.get_one::<String>("hours_since").unwrap().to_owned()
+            sub_matches.get_one::<i32>("hours_since").unwrap().to_owned()
         ),
         _ => {}
     }

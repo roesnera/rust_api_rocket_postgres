@@ -24,7 +24,7 @@ fn test_create_crate() {
         .send().unwrap();
     assert_eq!(response.status(), StatusCode::CREATED);
     
-    delete_test_crate(&client, response.json().unwrap());
+    // delete_test_crate(&client, response.json().unwrap());
     delete_test_rustacean(&client, rustacean);
 }
 

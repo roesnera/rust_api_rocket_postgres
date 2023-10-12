@@ -1,0 +1,22 @@
+<body>
+    <header>
+        <h1>Crates Daily Digest</h1>
+    </header>
+    <section>
+        <strong>Please find a list with the crates that were created in the past 24 hours</strong>
+    </section>
+    <section id="pageContent">
+        <main role="main">
+            {% for crate in crates %}
+            <article>
+                <h2>{{ crate.name }} - </h2> <code>{{ crate.code }} {{ crate.version }}</code>
+                <p>{{ crate.description }}</p>
+                <small>{{ crate.created_at }}</small>
+            </article>
+            {% endfor %}
+        </main>
+    </section>
+    <footer>
+        <p>&copy; {{ year }} Generates and sent by Adam's Crate Repository, made in Rust</p>
+    </footer>
+</body>

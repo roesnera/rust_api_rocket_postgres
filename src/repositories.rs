@@ -1,3 +1,4 @@
+use diesel::dsl::{IntervalDsl, now};
 use diesel::{PgConnection, QueryResult};
 use diesel::prelude::*;
 
@@ -35,6 +36,12 @@ impl RustaceanRepository {
 pub struct CrateRepository;
 
 impl CrateRepository {
+    pub fn find_since(c: &mut PgConnection, hours_since: i32) -> QueryResult<Vec<Crate>> {
+        crates::table.filter(
+            crates::created_at.ge(now - hours_since.hours())
+        ).order(crates::id.desc()).load::<Crate>(c)
+    }
+
     pub fn find(c: &mut PgConnection, id: i32) -> QueryResult<Crate> {
         crates::table.find(id).get_result(c)
     }

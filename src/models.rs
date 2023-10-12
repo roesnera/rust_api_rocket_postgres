@@ -22,7 +22,7 @@ pub struct NewRustacean {
     pub email: String,
 }
 
-#[derive(Queryable, AsChangeset, Deserialize, Serialize)]
+#[derive(Queryable, AsChangeset, Deserialize, Serialize, Debug)]
 pub struct Crate {
     #[serde(skip_deserializing)]
     pub id: i32,
