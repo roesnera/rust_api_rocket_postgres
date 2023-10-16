@@ -30,6 +30,7 @@ pub async fn view_crate(id: i32, db: DbConn, _user: User) -> Result<Value, Custo
 }
 #[rocket::post("/crates", format="json", data="<new_crate>")]
 pub async fn create_crate(new_crate: Json<NewCrate>, db: DbConn, _user: EditorUser) -> Result<Custom<Value>, Custom<Value>> {
+    println!("New crate received: {:?}", new_crate);
     db.run(move |c| {
         CrateRepository::create(c, new_crate.into_inner())
         .map(|a_crate| Custom(Status::Created, json!(a_crate)))
